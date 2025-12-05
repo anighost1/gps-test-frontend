@@ -1,40 +1,24 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import VehicleLayer from "./VehicleLayer";
+import { VehicleGPS } from "@/types/gps";
 
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-
-import iconPng from "leaflet/dist/images/marker-icon.png";
-import iconPng2x from "leaflet/dist/images/marker-icon-2x.png";
-import shadowPng from "leaflet/dist/images/marker-shadow.png";
-
-const DefaultIcon = L.icon({
-    iconUrl: iconPng.src,
-    iconRetinaUrl: iconPng2x.src,
-    shadowUrl: shadowPng.src,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
-
-export default function MapContainerLeaflet({ gps }: { gps: any }) {
-    if (!gps) {
-        return (
-            <div className="w-full h-screen flex items-center justify-center">
-                Waiting for GPS data...
-            </div>
-        );
-    }
-
-    const position = [gps.lat, gps.lon] as [number, number];
-
+export default function MapContainerLeaflet({
+    vehicles,
+    paths,
+    follow,
+}: {
+    vehicles: { [imei: string]: VehicleGPS };
+    paths: { [imei: string]: [number, number][] };
+    follow: boolean;
+}) {
     return (
         <MapContainer
-            center={position}
+            center={[22.5726, 88.3639]} // static start
             zoom={16}
+            zoomControl={true}
             style={{ height: "100vh", width: "100vw" }}
         >
             <TileLayer
@@ -42,15 +26,7 @@ export default function MapContainerLeaflet({ gps }: { gps: any }) {
                 maxZoom={22}
             />
 
-            <Marker position={position}>
-                <Popup>
-                    <div>
-                        <p><b>IMEI:</b> {gps.imei}</p>
-                        <p><b>Speed:</b> {gps.speed} km/h</p>
-                        <p><b>Time:</b> {gps.time}</p>
-                    </div>
-                </Popup>
-            </Marker>
+            <VehicleLayer vehicles={vehicles} paths={paths} follow={follow} />
         </MapContainer>
     );
 }
